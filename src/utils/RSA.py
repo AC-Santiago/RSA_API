@@ -121,61 +121,6 @@ class RSA:
                     break
         return [self.n, self.e], [self.n, self.d]
 
-    def _create_rule(self) -> str:
-        """
-        Crea una regla de cifrado basada en las reglas existentes y el resultado cifrado actual. Usado para el cifrado RSA.
-
-        Returns:
-            str: El resultado cifrado final.
-        """
-        contador = 1
-        for i in range(len(self.rules) - 1):
-            if self.rules[i] == self.rules[i + 1]:
-                contador += 1
-            else:
-                self.rules_Final.append(
-                    int(
-                        str(len(str(contador)))
-                        + str(contador)
-                        + str(len(str(self.rules[i])))
-                        + str(self.rules[i])
-                    )
-                )
-                contador = 1
-        self.rules_Final.append(
-            int(
-                str(len(str(contador)))
-                + str(contador)
-                + str(len(str(self.rules[-1])))
-                + str(self.rules[-1])
-            )
-        )
-        element = str(self.rules_Final[0]) + str(self.resultado_cifrado[0])
-        self.resultado_cifrado[0] = int(element)
-
-        component_A = int(0)
-        component_B = int(0)
-        if len(self.rules_Final) == 1:
-            component_A = int(str(self.rules_Final[0])[0:1])
-            component_B += int(str(self.rules_Final[0])[1 : component_A + 1])
-            self.resultado_cifrado_final = "".join(
-                str(e) for e in self.resultado_cifrado
-            )
-            return self.resultado_cifrado_final
-        else:
-            for i in range(1, len(self.rules_Final)):
-                component_A = int(str(self.rules_Final[i - 1])[0:1])
-                component_B += int(str(self.rules_Final[i - 1])[1 : component_A + 1])
-                element = str(self.rules_Final[i]) + str(
-                    self.resultado_cifrado[component_B]
-                )
-                self.resultado_cifrado[component_B] = int(element)
-                self.resultado_cifrado_final = "".join(
-                    str(e) for e in self.resultado_cifrado
-                )
-
-            return self.resultado_cifrado_final
-
     def cifrar(self, mensaje: str, Llave_publica: list) -> str:
         """
         Cifra un mensaje utilizando una llave pública (generada con la misama clase).
@@ -214,52 +159,36 @@ class RSA:
             str: El resultado cifrado final.
         """
         contador = 1
-        for i in range(len(self.rules) - 1):
-            if self.rules[i] == self.rules[i + 1]:
+        rules_final = []
+
+        for i in range(1, len(self.rules)):
+            if self.rules[i] == self.rules[i - 1]:
                 contador += 1
             else:
-                self.rules_Final.append(
-                    int(
-                        str(len(str(contador)))
-                        + str(contador)
-                        + str(len(str(self.rules[i])))
-                        + str(self.rules[i])
-                    )
+                rules_final.append(
+                    f"{len(str(contador))}{contador}{len(str(self.rules[i - 1]))}{self.rules[i - 1]}"
                 )
                 contador = 1
-        self.rules_Final.append(
-            int(
-                str(len(str(contador)))
-                + str(contador)
-                + str(len(str(self.rules[-1])))
-                + str(self.rules[-1])
-            )
+        rules_final.append(
+            f"{len(str(contador))}{contador}{len(str(self.rules[-1]))}{self.rules[-1]}"
         )
-        element = str(self.rules_Final[0]) + str(self.resultado_cifrado[0])
-        self.resultado_cifrado[0] = int(element)
 
-        component_A = int(0)
-        component_B = int(0)
-        if len(self.rules_Final) == 1:
-            component_A = int(str(self.rules_Final[0])[0:1])
-            component_B += int(str(self.rules_Final[0])[1 : component_A + 1])
-            self.resultado_cifrado_final = "".join(
-                str(e) for e in self.resultado_cifrado
+        self.rules_Final = [int(rule) for rule in rules_final]
+
+        self.resultado_cifrado[0] = int(
+            f"{self.rules_Final[0]}{self.resultado_cifrado[0]}"
+        )
+
+        component_B = 0
+        for i in range(1, len(self.rules_Final)):
+            component_A = int(str(self.rules_Final[i - 1])[0])
+            component_B += int(str(self.rules_Final[i - 1])[1 : component_A + 1])
+            self.resultado_cifrado[component_B] = int(
+                f"{self.rules_Final[i]}{self.resultado_cifrado[component_B]}"
             )
-            return self.resultado_cifrado_final
-        else:
-            for i in range(1, len(self.rules_Final)):
-                component_A = int(str(self.rules_Final[i - 1])[0:1])
-                component_B += int(str(self.rules_Final[i - 1])[1 : component_A + 1])
-                element = str(self.rules_Final[i]) + str(
-                    self.resultado_cifrado[component_B]
-                )
-                self.resultado_cifrado[component_B] = int(element)
-                self.resultado_cifrado_final = "".join(
-                    str(e) for e in self.resultado_cifrado
-                )
 
-            return self.resultado_cifrado_final
+        self.resultado_cifrado_final = "".join(map(str, self.resultado_cifrado))
+        return self.resultado_cifrado_final
 
     def descifrar(self, mensaje_cifrado: str, Llave_privada: list) -> str:
         """
@@ -373,3 +302,14 @@ class RSA:
             exponente = exponente // 2
             base = (base * base) % modulo
         return resultado
+
+
+if __name__ == "__main__":
+    rsa = RSA()
+    rsa.generar_bases()
+    llave_publica, llave_privada = rsa.generar_claves()
+    mensaje = "Hola gente como estamos, yo no tan bien estopy buscando inform,acion sobre el tema de tiempos de l aproduccion del cafe y no encuentro nada"
+    mensaje_cifrado = rsa.cifrar(mensaje, llave_publica)
+    mensaje_descifrado = rsa.descifrar(mensaje_cifrado, llave_privada)
+    print(mensaje_cifrado)
+    print(mensaje_descifrado)
