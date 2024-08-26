@@ -21,3 +21,6 @@ db.sqlite3
 
 # Archivos json
 *.json
+
+# Archivos jupyter
+*.ipynb
