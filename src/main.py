@@ -1,8 +1,6 @@
 from fastapi import FastAPI
+from src.routers.cifrado_descifrado import router as cifrado_descifrado_router
 
 app = FastAPI()
 
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+app.include_router(cifrado_descifrado_router)

@@ -1,13 +1,13 @@
 import secrets
 import numpy as np
 
-from manage_json import ManageJson
+from src.utils.manage_json import ManageJson
 
 
 class RSA:
     def __init__(self):
         """
-        Inicializa la clase CifradoDecifrado.
+        Inicializa la clase Cifrado Descifrado.
 
         Parámetros:
         - p (int): Número primo.
@@ -23,6 +23,7 @@ class RSA:
         - resultado_descifrado (list): Lista de resultados intermedios de descifrado.
         - rules (np.array): Array de reglas.
         """
+        self.lista_cifrado = []
         self.p = int()
         self.q = int()
         self.n = int()
@@ -45,7 +46,7 @@ class RSA:
         Genera los valores de las bases necesarios para el cifrado y descifrado.
 
         Returns:
-            tuple: Una tupla que contiene los valores de p, q, n y phi.
+            tuple: Una tuple que contiene los valores de p, q, n y phi.
         """
         path = r"src\json\Numeros_primos.json"
         numeros_primos_dict = ManageJson(path).read_json()
@@ -111,6 +112,7 @@ class RSA:
             >>> generar_clave()
             ([n, e], [n, d])
         """
+        self.generar_bases()
         self.e = int(secrets.choice(self._lista_maximo_comun_divisor(self.phi)))
         for i in range(1, self.phi):
             operacion_d1 = 1 + (i * self.phi)
@@ -121,13 +123,13 @@ class RSA:
                     break
         return [self.n, self.e], [self.n, self.d]
 
-    def cifrar(self, mensaje: str, Llave_publica: list) -> str:
+    def cifrar(self, mensaje_a_cifrar: str, llave_publica: list) -> str:
         """
         Cifra un mensaje utilizando una llave pública (generada con la misama clase).
 
         Args:
-            mensaje (str): El mensaje a cifrar.
-            Llave_publica (list): La llave pública utilizada para el cifrado.
+            mensaje_a_cifrar (str): El mensaje a cifrar
+            llave_publica (list): La llave pública utilizada para el cifrado
 
         Returns:
             str: El mensaje cifrado.
@@ -136,10 +138,10 @@ class RSA:
             >>> cifrar("Hola", [10778707, 10771595])
             '111810021898121777995727891755111810706556'
         """
-        self.longitud_mensaje = len(mensaje)
-        self.mensaje_cifrado = str(mensaje)
-        self.n = Llave_publica[0]
-        self.e = Llave_publica[1]
+        self.longitud_mensaje = len(mensaje_a_cifrar)
+        self.mensaje_cifrado = str(mensaje_a_cifrar)
+        self.n = llave_publica[0]
+        self.e = llave_publica[1]
 
         operacion = int()
         rule = int()
@@ -182,7 +184,7 @@ class RSA:
         component_B = 0
         for i in range(1, len(self.rules_Final)):
             component_A = int(str(self.rules_Final[i - 1])[0])
-            component_B += int(str(self.rules_Final[i - 1])[1 : component_A + 1])
+            component_B += int(str(self.rules_Final[i - 1])[1: component_A + 1])
             self.resultado_cifrado[component_B] = int(
                 f"{self.rules_Final[i]}{self.resultado_cifrado[component_B]}"
             )
@@ -218,7 +220,8 @@ class RSA:
 
     def _organizar_mensajeC(self, mensaje_cifrado: str) -> list:
         """
-        Esta función recibe un mensaje cifrado (cifrado por la funcion cifrar) y lo organiza en una lista siguiendo las instrucciones dadas por los componentes A, B, C y D.
+        Esta función recibe un mensaje cifrado (cifrado por la funcion cifrar) y
+        lo organiza en una lista siguiendo las instrucciones dadas por los componentes A, B, C y D.
 
         Componentes:
             A: Cantidad de digitos que tiene el componente B.
@@ -239,14 +242,14 @@ class RSA:
         cifrado = []
 
         component_A = int(mensaje_cifrado[0])
-        component_B = int(mensaje_cifrado[1 : 1 + component_A])
+        component_B = int(mensaje_cifrado[1: 1 + component_A])
         component_C = int(mensaje_cifrado[1 + component_A])
         component_D = int(
-            mensaje_cifrado[2 + component_A : 2 + component_A + component_C]
+            mensaje_cifrado[2 + component_A: 2 + component_A + component_C]
         )
 
         indice = 2 + component_A + component_C
-        cifrado.append(int(mensaje_cifrado[indice : indice + component_D]))
+        cifrado.append(int(mensaje_cifrado[indice: indice + component_D]))
         indice += component_D
 
         repeat = 1
@@ -254,22 +257,13 @@ class RSA:
             if repeat == component_B:
                 component_A = int(mensaje_cifrado[indice])
                 component_B = int(
-                    mensaje_cifrado[indice + 1 : indice + 1 + component_A]
+                    mensaje_cifrado[indice + 1: indice + 1 + component_A]
                 )
                 component_C = int(mensaje_cifrado[indice + 1 + component_A])
-                component_D = int(
-                    mensaje_cifrado[
-                        indice
-                        + 2
-                        + component_A : indice
-                        + 2
-                        + component_A
-                        + component_C
-                    ]
-                )
+                component_D = int(mensaje_cifrado[indice + 2 + component_A: indice + 2 + component_A + component_C])
                 indice += 2 + component_A + component_C
                 repeat = 0
-            cifrado.append(int(mensaje_cifrado[indice : indice + component_D]))
+            cifrado.append(int(mensaje_cifrado[indice: indice + component_D]))
             indice += component_D
             repeat += 1
 
@@ -277,7 +271,7 @@ class RSA:
 
     def _exponenciacion_rapida(self, base: int, exponente: int, modulo: int) -> int:
         """
-        Realiza la exponenciación rápida de un número dado aplicandole el modulo especificado.
+        Realiza la exponenciación rápida de un número dado aplicandole el módulo especificado.
 
         Args:
             base (int): El número base.
@@ -302,14 +296,3 @@ class RSA:
             exponente = exponente // 2
             base = (base * base) % modulo
         return resultado
-
-
-if __name__ == "__main__":
-    rsa = RSA()
-    rsa.generar_bases()
-    llave_publica, llave_privada = rsa.generar_claves()
-    mensaje = "Hola gente como estamos, yo no tan bien estopy buscando inform,acion sobre el tema de tiempos de l aproduccion del cafe y no encuentro nada"
-    mensaje_cifrado = rsa.cifrar(mensaje, llave_publica)
-    mensaje_descifrado = rsa.descifrar(mensaje_cifrado, llave_privada)
-    print(mensaje_cifrado)
-    print(mensaje_descifrado)
