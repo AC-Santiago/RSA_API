@@ -1,5 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 from src.utils.RSA import RSA
+from fastapi.responses import JSONResponse
 
 from src.models.cifrado_descifrado_request import CifrarRequest, DescifrarRequest
 
@@ -9,16 +10,18 @@ rsa = RSA()
 
 @router.post("/cifrar/", tags=["RSA"])
 async def cifrar(request: CifrarRequest):
-    return {"mensaje_cifrado": rsa.cifrar(request.mensaje, request.llave_publica)}
+    return JSONResponse(content={"mensaje_cifrado": rsa.cifrar(request.mensaje, request.llave_publica)},
+                        status_code=status.HTTP_200_OK)
 
 
 @router.post("/descifrar/", tags=["RSA"])
 async def descifrar(request: DescifrarRequest):
-    print(request.mensaje)
-    return {"mensaje_descifrado": rsa.descifrar(request.mensaje, request.llaves)}
+    return JSONResponse(content={"mensaje_descifrado": rsa.descifrar(request.mensaje, request.llave_privada)},
+                        status_code=status.HTTP_200_OK)
 
 
 @router.post("/generar_llaves/", tags=["RSA"])
 async def generar_llaves():
     llaves: tuple = rsa.generar_claves()
-    return {"Llave publica": llaves[0], "Llave privada": llaves[1]}
+    return JSONResponse(content={"llave_publica": llaves[0], "llave_privada": llaves[1]},
+                        status_code=status.HTTP_200_OK)

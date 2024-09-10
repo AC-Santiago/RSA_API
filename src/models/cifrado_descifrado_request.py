@@ -9,4 +9,4 @@ class CifrarRequest(BaseModel):
 
 class DescifrarRequest(BaseModel):
     mensaje: str
-    llaves: List[int]
+    llave_privada: List[int]
