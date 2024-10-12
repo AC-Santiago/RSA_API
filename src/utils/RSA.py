@@ -1,4 +1,6 @@
+import os
 import secrets
+
 import numpy as np
 
 from src.utils.manage_json import ManageJson
@@ -48,7 +50,11 @@ class RSA:
         Returns:
             tuple: Una tuple que contiene los valores de p, q, n y phi.
         """
-        path = r"src\json\Numeros_primos.json"
+        dir_actual = os.path.dirname((os.path.abspath(__file__)))
+        separador = os.path.sep
+        dir_prev_actual = separador.join(dir_actual.split(separador)[:-1])
+        path = dir_prev_actual + separador + "json" + separador + "Numeros_primos.json"
+
         numeros_primos_dict = ManageJson(path).read_json()
         numeros_primos_list = list(numeros_primos_dict["Numeros_primos"])
         while self.q == self.p:
@@ -184,7 +190,7 @@ class RSA:
         component_B = 0
         for i in range(1, len(self.rules_Final)):
             component_A = int(str(self.rules_Final[i - 1])[0])
-            component_B += int(str(self.rules_Final[i - 1])[1: component_A + 1])
+            component_B += int(str(self.rules_Final[i - 1])[1 : component_A + 1])
             self.resultado_cifrado[component_B] = int(
                 f"{self.rules_Final[i]}{self.resultado_cifrado[component_B]}"
             )
@@ -242,14 +248,14 @@ class RSA:
         cifrado = []
 
         component_A = int(mensaje_cifrado[0])
-        component_B = int(mensaje_cifrado[1: 1 + component_A])
+        component_B = int(mensaje_cifrado[1 : 1 + component_A])
         component_C = int(mensaje_cifrado[1 + component_A])
         component_D = int(
-            mensaje_cifrado[2 + component_A: 2 + component_A + component_C]
+            mensaje_cifrado[2 + component_A : 2 + component_A + component_C]
         )
 
         indice = 2 + component_A + component_C
-        cifrado.append(int(mensaje_cifrado[indice: indice + component_D]))
+        cifrado.append(int(mensaje_cifrado[indice : indice + component_D]))
         indice += component_D
 
         repeat = 1
@@ -257,13 +263,20 @@ class RSA:
             if repeat == component_B:
                 component_A = int(mensaje_cifrado[indice])
                 component_B = int(
-                    mensaje_cifrado[indice + 1: indice + 1 + component_A]
+                    mensaje_cifrado[indice + 1 : indice + 1 + component_A]
                 )
                 component_C = int(mensaje_cifrado[indice + 1 + component_A])
-                component_D = int(mensaje_cifrado[indice + 2 + component_A: indice + 2 + component_A + component_C])
+                component_D = int(
+                    mensaje_cifrado[
+                        indice + 2 + component_A : indice
+                        + 2
+                        + component_A
+                        + component_C
+                    ]
+                )
                 indice += 2 + component_A + component_C
                 repeat = 0
-            cifrado.append(int(mensaje_cifrado[indice: indice + component_D]))
+            cifrado.append(int(mensaje_cifrado[indice : indice + component_D]))
             indice += component_D
             repeat += 1
 
