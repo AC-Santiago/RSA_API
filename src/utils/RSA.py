@@ -3,7 +3,8 @@ import secrets
 
 import numpy as np
 
-from src.utils.manage_json import ManageJson
+# from src.utils.manage_json import ManageJson
+from manage_json import ManageJson
 
 
 class RSA:
@@ -50,10 +51,9 @@ class RSA:
         Returns:
             tuple: Una tuple que contiene los valores de p, q, n y phi.
         """
-        dir_actual = os.path.dirname((os.path.abspath(__file__)))
-        separador = os.path.sep
-        dir_prev_actual = separador.join(dir_actual.split(separador)[:-1])
-        path = dir_prev_actual + separador + "json" + separador + "Numeros_primos.json"
+
+        directory = os.path.dirname(os.path.abspath("Numeros_primos.json"))
+        path = os.path.join(directory, "src", "json", "Numeros_primos.json")
 
         numeros_primos_dict = ManageJson(path).read_json()
         numeros_primos_list = list(numeros_primos_dict["Numeros_primos"])
@@ -309,3 +309,14 @@ class RSA:
             exponente = exponente // 2
             base = (base * base) % modulo
         return resultado
+
+
+if __name__ == "__main__":
+    rsa = RSA()
+    llave_publica, llave_privada = rsa.generar_claves()
+    mensaje = "Hol"
+    mensaje_cifrado = rsa.cifrar(mensaje, llave_publica)
+    mensaje_descifrado = rsa.descifrar(mensaje_cifrado, llave_privada)
+    print(f"Mensaje original: {mensaje}")
+    print(f"Mensaje cifrado: {mensaje_cifrado}")
+    print(f"Mensaje descifrado: {mensaje_descifrado}")
