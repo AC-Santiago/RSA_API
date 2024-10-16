@@ -3,8 +3,9 @@ import secrets
 
 import numpy as np
 
-# from src.utils.manage_json import ManageJson
-from manage_json import ManageJson
+from src.utils.manage_json import ManageJson
+
+# from manage_json import ManageJson
 
 
 class RSA:
@@ -309,14 +310,3 @@ class RSA:
             exponente = exponente // 2
             base = (base * base) % modulo
         return resultado
-
-
-if __name__ == "__main__":
-    rsa = RSA()
-    llave_publica, llave_privada = rsa.generar_claves()
-    mensaje = "Hol"
-    mensaje_cifrado = rsa.cifrar(mensaje, llave_publica)
-    mensaje_descifrado = rsa.descifrar(mensaje_cifrado, llave_privada)
-    print(f"Mensaje original: {mensaje}")
-    print(f"Mensaje cifrado: {mensaje_cifrado}")
-    print(f"Mensaje descifrado: {mensaje_descifrado}")

@@ -22,8 +22,12 @@ db.sqlite3
 # Archivos json
 *.json
 
+#Ignorar carpeta json
+json/ 
+
 # Archivos jupyter
 *.ipynb
 
 # Numero primos
 Numeros_primos.py
+Generador_primos.py
