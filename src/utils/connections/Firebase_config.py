@@ -13,6 +13,7 @@ config = {
     "messagingSenderId": os.getenv("MESSAGING_SENDER_ID"),
     "appId": os.getenv("APP_ID"),
     "measurementId": os.getenv("MEASUREMENT_ID"),
+    "databaseURL": os.getenv("DATABASE_URL"),
 }
 
 

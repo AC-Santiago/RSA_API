@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
+from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from firebase_admin import auth
 
@@ -33,3 +34,11 @@ async def login_user(user: Usuario):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return user
+
+
+@router.post("/check_token/", tags=["users"])
+async def check_token(request: Request):
+    headers = request.headers
+    token = headers["Authorization"]
+    user = auth.verify_id_token(token)
+    return JSONResponse(content={"user": user}, status_code=status.HTTP_200_OK)
