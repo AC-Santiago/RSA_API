@@ -1,17 +1,18 @@
-from fastapi import APIRouter, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
 from src.models.cifrado_descifrado_request import CifrarRequest, DescifrarRequest
+from src.utils.auth import get_current_user
 from src.utils.RSA import RSA
 
 router = APIRouter()
 
 
 @router.post("/cifrar/", tags=["RSA"])
-def cifrar(request: CifrarRequest):
+def cifrar(request: CifrarRequest, user: Annotated[dict, Depends(get_current_user)]):
     rsa = RSA()
-    print(f"Mensaje de rsa {request.mensaje}")
-    print(f"Mensaje guardado en laclase RSA {rsa.mensaje_cifrado}")
     return JSONResponse(
         content={"mensaje_cifrado": rsa.cifrar(request.mensaje, request.llave_publica)},
         status_code=status.HTTP_200_OK,
@@ -19,7 +20,9 @@ def cifrar(request: CifrarRequest):
 
 
 @router.post("/descifrar/", tags=["RSA"])
-def descifrar(request: DescifrarRequest):
+def descifrar(
+    request: DescifrarRequest, user: Annotated[dict, Depends(get_current_user)]
+):
     rsa = RSA()
     return JSONResponse(
         content={
@@ -30,7 +33,7 @@ def descifrar(request: DescifrarRequest):
 
 
 @router.post("/generar_llaves/", tags=["RSA"])
-def generar_llaves():
+def generar_llaves(user: Annotated[dict, Depends(get_current_user)]):
     rsa = RSA()
     llaves: tuple = rsa.generar_claves()
     return JSONResponse(
