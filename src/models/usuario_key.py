@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 
 class UsuarioKey(BaseModel):
-    id_usuario: int
     nombre_llaves: str
     llave_publica: List[int]
-    llave_privada: str
+    llave_privada: List[int]
