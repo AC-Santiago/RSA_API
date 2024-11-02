@@ -53,7 +53,6 @@ async def save_keys(
     load_dotenv()
     llave_encrypt = os.getenv("KEY_ENCRYPT")
     f = Fernet(llave_encrypt.encode())
-    print(llaves_usuario)
     llave_privada_encrypt = f.encrypt(str(llaves_usuario["llave_privada"]).encode())
     llave_publica_encrypt = f.encrypt(str(llaves_usuario["llave_publica"]).encode())
     db = firestore_async.client()
@@ -64,9 +63,11 @@ async def save_keys(
     await (
         db.collection("usuarios")
         .document(user["uid"])
-        .collection(llaves_usuario["nombre_llaves"])
+        .collection("Llaves")
+        .document(llaves_usuario["nombre_llaves"])
         .set(llave_guardar)
     )
     return JSONResponse(
-        content={"User id": user["uid"]}, status_code=status.HTTP_200_OK
+        content={"mensaje": "Llaves almacenadas correctamente"},
+        status_code=status.HTTP_200_OK,
     )
