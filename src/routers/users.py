@@ -1,16 +1,11 @@
-import os
 from typing import Annotated
 
-from cryptography.fernet import Fernet
-from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from firebase_admin import auth, firestore_async
+from firebase_admin import auth
 
 from src.models.usuario import Usuario
-from src.models.usuario_key import UsuarioKey
-from src.utils.auth import get_current_user
 from src.utils.connections.Firebase_config import get_firebase_config
 
 router = APIRouter()
@@ -42,32 +37,3 @@ async def login_user(user: Annotated[OAuth2PasswordRequestForm, Depends()]):
         )
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-
-
-@router.post("/save_keys/", tags=["users"])
-async def save_keys(
-    user: Annotated[dict, Depends(get_current_user)], llaves_usuario: UsuarioKey
-):
-    llaves_usuario = llaves_usuario.dict()
-
-    load_dotenv()
-    llave_encrypt = os.getenv("KEY_ENCRYPT")
-    f = Fernet(llave_encrypt.encode())
-    llave_privada_encrypt = f.encrypt(str(llaves_usuario["llave_privada"]).encode())
-    llave_publica_encrypt = f.encrypt(str(llaves_usuario["llave_publica"]).encode())
-    db = firestore_async.client()
-    llave_guardar = {
-        "llave_publica": llave_publica_encrypt,
-        "llave_privada": llave_privada_encrypt,
-    }
-    await (
-        db.collection("usuarios")
-        .document(user["uid"])
-        .collection("Llaves")
-        .document(llaves_usuario["nombre_llaves"])
-        .set(llave_guardar)
-    )
-    return JSONResponse(
-        content={"mensaje": "Llaves almacenadas correctamente"},
-        status_code=status.HTTP_200_OK,
-    )
