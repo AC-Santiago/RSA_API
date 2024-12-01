@@ -31,3 +31,6 @@ json/
 # Numero primos
 Numeros_primos.py
 Generador_primos.py
+
+# Otros
+.python-version
