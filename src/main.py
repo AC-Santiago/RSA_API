@@ -16,6 +16,7 @@ async def startup_event():
 
 app.add_middleware(HTTPErrorHandler)
 
+# Coleccion de las rutas
 app.include_router(cifrado_descifrado_router)
 app.include_router(users_router)
 app.include_router(keys_router)
