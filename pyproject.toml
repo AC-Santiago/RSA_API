@@ -58,6 +58,7 @@ dependencies = [
     "pycryptodome==3.21.0",
     "pydantic==2.8.2",
     "pydantic-core==2.20.1",
+    "pydantic-settings>=2.8.1",
     "pygments==2.18.0",
     "pyjwt==2.9.0",
     "pynvim==0.5.0",

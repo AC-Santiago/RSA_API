@@ -1,19 +1,18 @@
-import os
-
 import pyrebase
-from dotenv import load_dotenv
+from src.core.config import get_settings
 
-load_dotenv()
+
+settings = get_settings()
 
 config = {
-    "apiKey": os.getenv("API_KEY"),
-    "authDomain": os.getenv("AUTH_DOMAIN"),
-    "projectId": os.getenv("PROJECT_ID"),
-    "storageBucket": os.getenv("STORAGE_BUCKET"),
-    "messagingSenderId": os.getenv("MESSAGING_SENDER_ID"),
-    "appId": os.getenv("APP_ID"),
-    "measurementId": os.getenv("MEASUREMENT_ID"),
-    "databaseURL": os.getenv("DATABASE_URL"),
+    "apiKey": settings.APY_KEY,
+    "authDomain": settings.AUTH_DOMAIN,
+    "projectId": settings.PROJECT_ID,
+    "storageBucket": settings.STORAGE_BUCKET,
+    "messagingSenderId": settings.MESSAGING_SENDER_ID,
+    "appId": settings.APP_ID,
+    "measurementId": settings.MEASUREMENT_ID,
+    "databaseURL": settings.DATABASE_URL,
 }
 
 

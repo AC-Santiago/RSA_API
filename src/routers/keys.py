@@ -6,11 +6,12 @@ from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
-from firebase_admin import firestore_async
+from google.cloud.firestore import AsyncClient
 
 from src.models.usuario_key import UsuarioKey
 from src.utils.auth import get_current_user
 from src.utils.connections.Firebase_config import get_firebase_config
+from src.utils.connections.Firebase_connection import get_client
 
 router = APIRouter()
 firebase = get_firebase_config()
@@ -18,10 +19,11 @@ firebase = get_firebase_config()
 
 @router.post("/save_keys/", tags=["keys"])
 async def save_keys(
-    user: Annotated[dict, Depends(get_current_user)], llaves_usuario: UsuarioKey
+    db: Annotated[AsyncClient, Depends(get_client)],
+    user: Annotated[dict, Depends(get_current_user)],
+    llaves_usuario: UsuarioKey,
 ):
-    llaves_usuario = llaves_usuario.dict()
-    db = firestore_async.client()
+    llaves_usuario = llaves_usuario.model_dump()
     sentencia = (
         db.collection("usuarios")
         .document(user["uid"])
@@ -37,8 +39,12 @@ async def save_keys(
     load_dotenv()
     llave_encrypt = os.getenv("KEY_ENCRYPT")
     f = Fernet(llave_encrypt.encode())
-    llave_privada_encrypt = f.encrypt(str(llaves_usuario["llave_privada"]).encode())
-    llave_publica_encrypt = f.encrypt(str(llaves_usuario["llave_publica"]).encode())
+    llave_privada_encrypt = f.encrypt(
+        str(llaves_usuario["llave_privada"]).encode()
+    )
+    llave_publica_encrypt = f.encrypt(
+        str(llaves_usuario["llave_publica"]).encode()
+    )
     llave_guardar = {
         "llave_publica": llave_publica_encrypt,
         "llave_privada": llave_privada_encrypt,
@@ -51,9 +57,13 @@ async def save_keys(
 
 
 @router.get("/get_keys/", tags=["keys"])
-async def get_keys(user: Annotated[dict, Depends(get_current_user)]):
-    db = firestore_async.client()
-    sentencia = db.collection("usuarios").document(user["uid"]).collection("Llaves")
+async def get_keys(
+    db: Annotated[AsyncClient, Depends(get_client)],
+    user: Annotated[dict, Depends(get_current_user)],
+):
+    sentencia = (
+        db.collection("usuarios").document(user["uid"]).collection("Llaves")
+    )
     consulta = await sentencia.get()
     llaves = []
     for llave in consulta:
@@ -61,15 +71,24 @@ async def get_keys(user: Annotated[dict, Depends(get_current_user)]):
         load_dotenv()
         llave_encrypt = os.getenv("KEY_ENCRYPT")
         f = Fernet(llave_encrypt.encode())
-        llave["llave_publica"] = json.loads(f.decrypt(llave["llave_publica"]).decode())
-        llave["llave_privada"] = json.loads(f.decrypt(llave["llave_privada"]).decode())
+        llave["llave_publica"] = json.loads(
+            f.decrypt(llave["llave_publica"]).decode()
+        )
+        llave["llave_privada"] = json.loads(
+            f.decrypt(llave["llave_privada"]).decode()
+        )
         llaves.append(llave)
-    return JSONResponse(content={"llaves": llaves}, status_code=status.HTTP_200_OK)
+    return JSONResponse(
+        content={"llaves": llaves}, status_code=status.HTTP_200_OK
+    )
 
 
 @router.get("/get_key/{nombre_llaves}", tags=["keys"])
-async def get_key(user: Annotated[dict, Depends(get_current_user)], nombre_llaves: str):
-    db = firestore_async.client()
+async def get_key(
+    db: Annotated[AsyncClient, Depends(get_client)],
+    user: Annotated[dict, Depends(get_current_user)],
+    nombre_llaves: str,
+):
     sentencia = (
         db.collection("usuarios")
         .document(user["uid"])
@@ -86,6 +105,12 @@ async def get_key(user: Annotated[dict, Depends(get_current_user)], nombre_llave
     load_dotenv()
     llave_encrypt = os.getenv("KEY_ENCRYPT")
     f = Fernet(llave_encrypt.encode())
-    llave["llave_publica"] = json.loads(f.decrypt(llave["llave_publica"]).decode())
-    llave["llave_privada"] = json.loads(f.decrypt(llave["llave_privada"]).decode())
-    return JSONResponse(content={"llave": llave}, status_code=status.HTTP_200_OK)
+    llave["llave_publica"] = json.loads(
+        f.decrypt(llave["llave_publica"]).decode()
+    )
+    llave["llave_privada"] = json.loads(
+        f.decrypt(llave["llave_privada"]).decode()
+    )
+    return JSONResponse(
+        content={"llave": llave}, status_code=status.HTTP_200_OK
+    )
