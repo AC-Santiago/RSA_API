@@ -4,18 +4,22 @@ import firebase_admin
 from firebase_admin import credentials, firestore_async
 from google.cloud.firestore import AsyncClient
 
-from src.core.config import get_settings
+from app.core.config import get_settings
 
 
 settings = get_settings()
 
 
 def connect_firebase():
-    separador = os.path.sep
-    directory = os.path.dirname(os.path.abspath(__file__))
-    dir_prev = f"{separador}".join(directory.split(separador)[:-2])
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+    firebase_key = settings.FIRE_BASE_KEY.strip('"').strip("'")
+    path = os.path.join(base_dir, "app", "json", firebase_key)
 
-    path = os.path.join(dir_prev, "json", settings.FIRE_BASE_KEY)
+    if not os.path.exists(path):
+        raise FileNotFoundError(
+            f"El archivo de credenciales no existe en: {path}"
+        )
 
     cred = credentials.Certificate(path)
     firebase_admin.initialize_app(cred)

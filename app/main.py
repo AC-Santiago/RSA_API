@@ -1,10 +1,10 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from src.routers.cifrado_descifrado import router as cifrado_descifrado_router
-from src.routers.keys import router as keys_router
-from src.routers.users import router as users_router
-from src.utils.connections.Firebase_connection import connect_firebase
-from src.utils.http_error_handler import HTTPErrorHandler
+from app.routers.cifrado_descifrado import router as cifrado_descifrado_router
+from app.routers.keys import router as keys_router
+from app.routers.users import router as users_router
+from app.utils.connections.Firebase_connection import connect_firebase
+from app.utils.http_error_handler import HTTPErrorHandler
 
 
 @asynccontextmanager

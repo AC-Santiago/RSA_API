@@ -8,10 +8,10 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from google.cloud.firestore import AsyncClient
 
-from src.models.usuario_key import UsuarioKey
-from src.utils.auth import get_current_user
-from src.utils.connections.Firebase_config import get_firebase_config
-from src.utils.connections.Firebase_connection import get_client
+from app.models.usuario_key import UsuarioKey
+from app.utils.auth import get_current_user
+from app.utils.connections.Firebase_config import get_firebase_config
+from app.utils.connections.Firebase_connection import get_client
 
 router = APIRouter()
 firebase = get_firebase_config()

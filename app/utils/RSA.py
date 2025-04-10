@@ -3,7 +3,7 @@ import secrets
 
 import numpy as np
 
-from src.utils.manage_json import ManageJson
+from app.utils.manage_json import ManageJson
 
 # from manage_json import ManageJson
 
@@ -191,7 +191,9 @@ class RSA:
         component_B = 0
         for i in range(1, len(self.rules_Final)):
             component_A = int(str(self.rules_Final[i - 1])[0])
-            component_B += int(str(self.rules_Final[i - 1])[1 : component_A + 1])
+            component_B += int(
+                str(self.rules_Final[i - 1])[1 : component_A + 1]
+            )
             self.resultado_cifrado[component_B] = int(
                 f"{self.rules_Final[i]}{self.resultado_cifrado[component_B]}"
             )
@@ -220,7 +222,9 @@ class RSA:
         self.d = Llave_privada[1]
         for i in range(rango):
             letra_cifrado = int(self.lista_cifrado[i])
-            operacion = self._exponenciacion_rapida(letra_cifrado, self.d, self.n)
+            operacion = self._exponenciacion_rapida(
+                letra_cifrado, self.d, self.n
+            )
             self.resultado_descifrado.append(chr(operacion))
         mesanje_descifrado = "".join(self.resultado_descifrado)
         return mesanje_descifrado
@@ -269,7 +273,9 @@ class RSA:
                 component_C = int(mensaje_cifrado[indice + 1 + component_A])
                 component_D = int(
                     mensaje_cifrado[
-                        indice + 2 + component_A : indice
+                        indice
+                        + 2
+                        + component_A : indice
                         + 2
                         + component_A
                         + component_C
@@ -283,7 +289,9 @@ class RSA:
 
         return cifrado
 
-    def _exponenciacion_rapida(self, base: int, exponente: int, modulo: int) -> int:
+    def _exponenciacion_rapida(
+        self, base: int, exponente: int, modulo: int
+    ) -> int:
         """
         Realiza la exponenciación rápida de un número dado aplicandole el módulo especificado.
 

@@ -5,12 +5,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from fastapi.responses import FileResponse, JSONResponse
 
-from src.models.cifrado_descifrado_request import (
+from app.models.cifrado_descifrado_request import (
     CifrarRequest,
     DescifrarRequest,
 )
-from src.utils.auth import get_current_user
-from src.utils.RSA import RSA
+from app.utils.auth import get_current_user
+from app.utils.RSA import RSA
 
 router = APIRouter()
 
@@ -18,10 +18,16 @@ SEPARATOR = os.path.sep
 
 
 @router.post("/cifrar/", tags=["RSA"])
-def cifrar(request: CifrarRequest, user: Annotated[dict, Depends(get_current_user)]):
+def cifrar(
+    request: CifrarRequest, user: Annotated[dict, Depends(get_current_user)]
+):
     rsa = RSA()
     return JSONResponse(
-        content={"mensaje_cifrado": rsa.cifrar(request.mensaje, request.llave_publica)},
+        content={
+            "mensaje_cifrado": rsa.cifrar(
+                request.mensaje, request.llave_publica
+            )
+        },
         status_code=status.HTTP_200_OK,
     )
 
@@ -34,7 +40,9 @@ def descifrar(
     print(f"request.mensaje: {request.mensaje}")
     return JSONResponse(
         content={
-            "mensaje_descifrado": rsa.descifrar(request.mensaje, request.llave_privada)
+            "mensaje_descifrado": rsa.descifrar(
+                request.mensaje, request.llave_privada
+            )
         },
         status_code=status.HTTP_200_OK,
     )
@@ -65,7 +73,9 @@ async def cifrar_file(
         llave_publica = [int(i) for i in llave_publica.split(",")]
     except ValueError:
         return JSONResponse(
-            content={"detail": "La llave publica debe ser una lista de enteros"},
+            content={
+                "detail": "La llave publica debe ser una lista de enteros"
+            },
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -90,8 +100,12 @@ async def cifrar_file(
     contenido: str = ",".join(lista_mensajes_cifrados)
 
     file_name: str = "cifrado"
-    file = create_file_txt(contenido.encode("utf-8"), f"files{SEPARATOR}{file_name}")
-    path: str = os.path.abspath(os.path.join(os.getcwd(), "files", f"{file_name}.txt"))
+    file = create_file_txt(
+        contenido.encode("utf-8"), f"files{SEPARATOR}{file_name}"
+    )
+    path: str = os.path.abspath(
+        os.path.join(os.getcwd(), "files", f"{file_name}.txt")
+    )
     print(f"Path: {path}")
     if not os.path.exists(path):
         return JSONResponse(
@@ -116,7 +130,9 @@ async def descifrar_file(
         llave_privada = [int(i) for i in llave_privada.split(",")]
     except ValueError:
         return JSONResponse(
-            content={"detail": "La llave privada debe ser una lista de enteros"},
+            content={
+                "detail": "La llave privada debe ser una lista de enteros"
+            },
             status_code=status.HTTP_400_BAD_REQUEST,
         )
     if archivo.content_type != "text/plain":
@@ -133,12 +149,18 @@ async def descifrar_file(
 
     chunks = contenido.split(",")
     with ThreadPoolExecutor() as executor:
-        lista_mensajes_descifrados = list(executor.map(descifrar_chunck, chunks))
+        lista_mensajes_descifrados = list(
+            executor.map(descifrar_chunck, chunks)
+        )
     contenido = "".join(lista_mensajes_descifrados).strip("\n")
 
     file_name: str = "descifrado"
-    file = create_file_txt(contenido.encode("utf-8"), f"files{SEPARATOR}{file_name}")
-    path: str = os.path.abspath(os.path.join(os.getcwd(), "files", f"{file_name}.txt"))
+    file = create_file_txt(
+        contenido.encode("utf-8"), f"files{SEPARATOR}{file_name}"
+    )
+    path: str = os.path.abspath(
+        os.path.join(os.getcwd(), "files", f"{file_name}.txt")
+    )
     print(f"Path: {path}")
 
     if not os.path.exists(path):
